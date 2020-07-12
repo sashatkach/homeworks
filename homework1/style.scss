@@ -1,0 +1,46 @@
+@import 'normalize';
+@import 'color';
+
+
+.wrapper {
+    width: 50%;
+    margin: 0 auto;
+    border-radius: 3px;
+    border: 1px solid $curious_blue;
+    background-color: $catskill_white;
+
+    &__add-button {
+
+        &--now{
+            padding: 10px;
+            border: 0;
+            border-radius: 5px;
+            background-color: $jade;
+            color: $white;
+        }
+    }
+
+    &__header {
+        padding: 10px;
+        background-color: $curious_blue;
+        color: $white;
+
+    }
+}
+
+.content{
+    &__contacts {
+        width: 98%;
+        margin: 10px;
+        border: 1px solid $mercury;
+    }
+
+    &__row {
+        border: 1px solid $mercury;
+    }
+
+    &__cell {
+        padding: 10px;
+    }
+}
+

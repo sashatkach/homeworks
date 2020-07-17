@@ -11,6 +11,7 @@ $(document).ready(function(){
         init: function(){
             this.stopTime = 0;
             this.totalSeconds = 0;
+            this.secondsWithoutCalculate();
             this.stopCountSeconds();
             this.stopActiveSeconds();
             this.startCountSeconds();
@@ -52,12 +53,16 @@ $(document).ready(function(){
             return this.totalSeconds - this.stopTime;
         },
 
-        setPeriodWithoutCalculate: function(time){
+        setSecondsWithoutCalculate: function(time){
             this.secondsWithoutCalculate += time;
         },
 
-        getPeriodWithoutCalculate: function(){
+        getSecondsWithoutCalculate: function(){
             return this.secondsWithoutCalculate;
+        },
+
+        resetSecondsWithoutCalculate: function(){
+            this.secondsWithoutCalculate = 0;
         },
 
         setStopSeconds: function(time){
@@ -83,14 +88,14 @@ $(document).ready(function(){
         if(logger.idActiveInterval){
             clearInterval(logger.idActiveInterval);
         }
-        
-        if(logger.getPeriodWithoutCalculate() >= 20){
-            logger.secondsWithoutCalculate = 0;
-            if(logger.stopTime >= 20)
-                logger.stopTime -= 20;
+
+        if(logger.getSecondsWithoutCalculate() >= 20){
+            logger.resetSecondsWithoutCalculate();
+            if(logger.getStopTime() >= 20)
+                logger.setStopTime(-20);
         }
 
-        logger.idActiveInterval = setInterval(() => {logger.stopTime += 1, logger.secondsWithoutCalculate += 1}, 1000);
+        logger.idActiveInterval = setInterval(() => {logger.setStopTime(1), logger.setSecondsWithoutCalculate(1)}, 1000);
     });
 
     $(window).blur(function(event){

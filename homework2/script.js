@@ -1,31 +1,78 @@
-$(document).ready(function(){
-    //let date = new Date();
+const logger = (function(){
+    let handlers = {
+        onMouseMoveWindow: function(){
+            $(window).mousemove(function(event){
+                if(logs.idActiveInterval){
+                    clearInterval(logs.idActiveInterval);
+                }
+        
+                if(logs.getSecondsWithoutCalculate() >= 20){
+                    logs.resetSecondsWithoutCalculate();
+                    if(logs.getStopTime() >= 20)
+                        logs.addStopTime(-20);
+                }
+        
+                logs.idActiveInterval = setInterval(() => {logs.addStopSeconds(1), logs.addSecondsWithoutCalculate(1)}, 1000);
+            });
+        },
 
-    let logger = {
+        onCloseWindow : function(){
+            $(window).blur(function(event){
+                logs.leaveControlPage();
+            });
+        },
+    
+        onLeaveWindow: function(){
+            $(window).on('unload', function(event){
+                logs.leaveControlPage();
+            });
+        },
+    
+        onFocusWindow: function(){
+            $(window).focus(function(){
+                logs.reset();
+            });
+        }
+    };
+
+    let logs = {
         totalSeconds: 0,
         idTotalInterval: null,
         idActiveInterval : null,
         stopTime : 0,
         secondsWithoutCalculate : 0,
 
-        init: function(){
+        preInit: function(){
             this.stopTime = 0;
             this.totalSeconds = 0;
-            this.secondsWithoutCalculate();
+            this.resetSecondsWithoutCalculate();
             this.stopCountSeconds();
             this.stopActiveSeconds();
             this.startCountSeconds();
-            if(localStorage.length === 0){
-                localStorage.setItem('logs', JSON.stringify([]));
+        },
+
+        init: function(){
+            this.preInit();
+            handlers.onMouseMoveWindow();
+            handlers.onFocusWindow();
+            handlers.onLeaveWindow();
+            handlers.onCloseWindow();
+
+            if(!localStorage.getItem(this.config.localStorageName)){
+                localStorage.setItem(this.config.localStorageName, JSON.stringify([]));
             }
         },
 
-        loadData: function(){
-            return JSON.parse(localStorage.getItem('logs'));
+        reset: function(){
+            this.preInit();
         },
 
-        writeRecord: function(){
-            let valWithLocalStorageData = this.loadData();
+        selectData: function(){
+            return JSON.parse(localStorage.getItem(this.config.localStorageName));
+        },
+
+        insertData: function(){
+            let valWithLocalStorageData = this.selectData();
             valWithLocalStorageData.push({
                 pageUrl: location.href,
                 time: {
@@ -33,12 +80,18 @@ $(document).ready(function(){
                     activeTime: this.getActiveTime()
                 }
             })
-            localStorage.setItem('logs', JSON.stringify(valWithLocalStorageData));
+            localStorage.setItem(this.config.localStorageName, JSON.stringify(valWithLocalStorageData));
+        },
+
+        leaveControlPage: function(){
+            this.stopCountSeconds();
+            this.stopActiveSeconds();
+            this.insertData();
         },
 
         startCountSeconds: function(){
             that = this;
-            that.idSetInterval = setInterval(() => { that.setTotalSeconds(1) }, 1000);
+            that.idTotalInterval = setInterval(() => { that.addTotalSeconds(1) }, 1000);
         },
 
         stopCountSeconds: function(){
@@ -53,7 +106,7 @@ $(document).ready(function(){
             return this.totalSeconds - this.stopTime;
         },
 
-        setSecondsWithoutCalculate: function(time){
+        addSecondsWithoutCalculate: function(time){
             this.secondsWithoutCalculate += time;
         },
 
@@ -65,7 +118,7 @@ $(document).ready(function(){
             this.secondsWithoutCalculate = 0;
         },
 
-        setStopSeconds: function(time){
+        addStopSeconds: function(time){
             this.stopTime += time;
         },
 
@@ -73,38 +126,20 @@ $(document).ready(function(){
             return this.stopTime;
         },
 
-        setTotalSeconds: function(time){
+        addTotalSeconds: function(time){
             this.totalSeconds += time;
         },
         
         getTotalSeconds: function(){
             return this.totalSeconds;
-        },
-    }
-
-    logger.init();
-    
-    $(window).mousemove(function(event){
-        if(logger.idActiveInterval){
-            clearInterval(logger.idActiveInterval);
         }
+    };
 
-        if(logger.getSecondsWithoutCalculate() >= 20){
-            logger.resetSecondsWithoutCalculate();
-            if(logger.getStopTime() >= 20)
-                logger.setStopTime(-20);
-        }
+    return {
+        init: logs.init();
+    };
+})();
 
-        logger.idActiveInterval = setInterval(() => {logger.setStopTime(1), logger.setSecondsWithoutCalculate(1)}, 1000);
-    });
-
-    $(window).blur(function(event){
-        logger.stopCountSeconds();
-        logger.stopActiveSeconds();
-        logger.writeRecord();
-    });
-
-    $(window).focus(function(){
-        logger.init();
-    });
+$(document).ready(function(){
+    logger.init();  
 });

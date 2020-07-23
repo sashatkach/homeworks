@@ -1,0 +1,88 @@
+@import 'reset';
+@import 'normalize';
+@import 'color';
+
+.wrapper{
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    width: 50%;
+    margin: 0 auto;
+}
+
+.column {
+    border: 1px solid $blue;
+    border-radius: 5px;
+
+    &__heading {
+        text-align: center;
+        padding: 10px;
+        color: $catskill_white;
+        border-bottom: 1px solid $blue;
+        border-radius: 5px;
+        
+        &--queue{
+            background-color: $jaffa;
+        }
+
+        &--inwork{
+            background-color: $energyYellow;
+        }
+
+        &--complited{
+            background-color: $celery;
+        }
+    }
+}
+
+.content {
+    padding: 10px;
+    
+    &__stickerQueue{
+        position: relative;
+    }
+
+    &__addBtn {
+        display: block;
+        margin: 0 auto;
+        color: $white;
+        border: none;
+        border-radius: 5px;
+        background-color: $jade;
+    }
+
+    &__stickerQueue {
+        display: table;
+        margin-bottom: 10px;
+        width: 100px;
+        height: 100px;
+        background-color: $jaffa;
+    }
+    &__close--queue {
+        position: absolute;
+        top: 3px;
+        right: 2px;
+        content: "\f00d";
+        font: normal normal normal 24px/1 FontAwesome;
+        color: $white;
+    }
+
+    &__edit--queue {
+        position: absolute;
+        top: 3px;
+        right: 22px;
+        content: "\f040";
+        font: normal normal normal 24px/1 FontAwesome;
+        color: $white;
+    }
+    
+
+    &__name {
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+}
+
+
+

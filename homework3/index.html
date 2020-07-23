@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="wrapper">
+        <section class="column">
+            <h3 class="column__heading column__heading--queue">Queue</h3>
+            <div class="content">
+                <button id="addTaskQueue" class="content__addBtn"><i class="fa fa-plus" aria-hidden="true"></i></button>
+            </div>
+        </section>
+        <section class="column">
+            <h3 class="column__heading column__heading--inwork">In work</h3>
+            <div class="content">
+                <div class="content__stickerInWork"></div>
+                <button id="addTaskInWork" class="content__addBtn"><i class="fa fa-plus" aria-hidden="true"></i></button>
+            </div>
+        </section>
+        <section class="column">
+            <h3 class="column__heading column__heading--complited">Complited</h3>
+            <div class="content">
+                <div class="content__stickerComplited"></div>
+                <button id="addTaskComplited" class="content__addBtn"><i class="fa fa-plus" aria-hidden="true"></i></button>
+            </div>
+        </section>   
+    </main>
+    <script src="lodash.js"></script>
+    <script src="jquery.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+    <script src="script.js"></script>  
+</body>
+</html>

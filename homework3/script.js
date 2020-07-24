@@ -15,7 +15,7 @@ let makingTasker = (function(){
             let localStorageDataQueue = _.filter(localStorageData, {type: 'queue'});
             _.each(localStorageDataQueue, function(item){
                 htmlCodeQueue += `<div class="content__stickerQueue" data-id="${item.id}">
-                    <div class="content__name">${name}</div>
+                    <div class="content__name">${item.name}</div>
                     <i class="fa fa-times content__close--queue" aria-hidden="true"></i>
                     <i class="fa fa-pencil content__edit--queue" aria-hidden="true"></i>
                 </div>`;
@@ -32,21 +32,22 @@ let makingTasker = (function(){
             localStorage.setItem(config.appData, JSON.stringify(localStorageData));
         },
 
-        addTask: function(id, newTag, insertBeforeEl, closeTag, editTag){
+        addTask: function(id, name, newTag, insertBeforeEl, closeTag, editTag, type){
             let that = this;
             
             let newSticker = $(newTag).insertBefore(insertBeforeEl);
             
             newSticker.find(closeTag).click(function(){
-                handler.delete(that);
+                handler.delete(that, $(this).parent().attr('data-id'));
             });
 
             newSticker.find(editTag).click(function(){
-                handler.edit(that);
+                console.log($(that));
+                handler.edit(that, $(this).parent().attr('data-id'));
             });
             
             let tmpArrLocalStorage = that.selectDataLocalStorage();
-            tmpArrLocalStorage.push({id: id, name:name, date:new Date(), type:"queue"});
+            tmpArrLocalStorage.push({id: id, name:name, date:new Date(), type:type});
             that.insertDataLocalStorage(tmpArrLocalStorage); 
         },
     };
@@ -54,14 +55,44 @@ let makingTasker = (function(){
     let handler = {
         on: function(){
             that = this;
+            let currentTask = null;
+            let currentTaskHtml = null;
             $('#addTaskQueue').click(function(){
                 let id = Math.floor(Math.random() * 100);
                 let name = prompt('What will be the name of task', 'default task');
-                logs.addTask(id, `<div class="content__stickerQueue" data-id="${id}">
+                logs.addTask(id, name,`<div class="content__stickerQueue" data-id="${id}">
                 <div class="content__name">${name}</div>
                 <i class="fa fa-times content__close--queue" aria-hidden="true"></i>
                 <i class="fa fa-pencil content__edit--queue" aria-hidden="true"></i>
-            </div>`, '#addTaskQueue', '.content__close--queue', '.content__edit--queue');
+            </div>`, '#addTaskQueue', '.content__close--queue', '.content__edit--queue', 'queue');
+            });
+
+            $('.content__stickerQueue').draggable({
+                start: function(){
+                    let id = +$(this).attr('data-id');
+                    currentTask = _.find(logs.selectDataLocalStorage(), {id: id});
+                    currentTaskHtml = this;
+                }
+            });
+
+            $("#contentInWork").droppable({
+                drop: function (){
+                    $(currentTaskHtml).animate({
+                        opacity: 0.5
+                    }, 1000).remove();
+
+                    let dataLocalStorage = logs.selectDataLocalStorage();
+                    _.remove(dataLocalStorage, {id: currentTask.id});
+                    logs.insertDataLocalStorage(dataLocalStorage);
+
+                    let id = Math.floor(Math.random() * 100);
+
+                    logs.addTask(currentTask.id, currentTask.name,`<div class="content__stickerInWork" data-id="${id}">
+                        <div class="content__name">${currentTask.name}</div>
+                        <i class="fa fa-times content__close--inwork" aria-hidden="true"></i>
+                        <i class="fa fa-pencil content__edit--inwork" aria-hidden="true"></i>
+                    </div>`, '#addTaskInWork', '.content__close--inwork', '.content__edit--inwork', 'inwork');
+                }
             });
 
             $('.content__edit--queue').click(function(event){
@@ -80,19 +111,20 @@ let makingTasker = (function(){
         off: function(){},
 
         edit: function(that, id){
-            alert('edit');
+            alert(id);
             let anotherNameTask = prompt('Another name of task', 'another task');
             let tmpLocalStorage = logs.selectDataLocalStorage();
-            let tmpTask = _.remove(tmpLocalStorage, {id: id})[0];
+            let tmpTask = _.remove(tmpLocalStorage, {id: +id})[0];
             tmpTask['name'] = anotherNameTask;
             tmpLocalStorage.push(tmpTask);
+
             logs.insertDataLocalStorage(tmpLocalStorage);
         },
 
         delete: function(that, id){
-            alert('delete');
+            alert(id);
             let tmpLocalStorage = logs.selectDataLocalStorage();
-            let tmpTask = _.remove(tmpLocalStorage, {id: id});
+            _.remove(tmpLocalStorage, {id: +id});
             logs.insertDataLocalStorage(tmpLocalStorage);
             $(that).parent().remove();
         }

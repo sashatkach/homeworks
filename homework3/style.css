@@ -401,6 +401,13 @@ template {
     width: 100px;
     height: 100px;
     background-color: #f3e25e; }
+  .content__stickerComplited {
+    position: relative;
+    display: table;
+    margin-bottom: 10px;
+    width: 100px;
+    height: 100px;
+    background-color: #9ecd59; }
   .content__close {
     position: absolute;
     top: 3px;

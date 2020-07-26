@@ -4,6 +4,11 @@ const makingTasker = (function(){
         initData: [],
     };
 
+    const taskObject = {
+        currentTask : null,
+        currentTaskHtml : null,
+    };
+
     const logs = {
         init: function(){
             if(!localStorage.getItem(config.appData)){
@@ -31,11 +36,50 @@ const makingTasker = (function(){
 
         insertDataLocalStorage: function(localStorageData){
             localStorage.setItem(config.appData, JSON.stringify(localStorageData));
+        },
+    };
+
+    const managerDraggable = {
+        startDraggable: function(that){
+            let id = +$(that).attr('data-id');
+            currentTask = _.find(logs.selectDataLocalStorage(), {id: id});
+            currentTaskHtml = that;
+            return [currentTask, currentTaskHtml];
+        },
+
+        stopDraggable: function(type){
+            if(taskObject.currentTask.type !== type){
+                $(taskObject.currentTaskHtml).animate({
+                    opacity: 0.5
+                }, 1000).remove();
+
+                let dataLocalStorage = logs.selectDataLocalStorage();
+                _.remove(dataLocalStorage, {id: taskObject.currentTask.id});
+                logs.insertDataLocalStorage(dataLocalStorage);
+
+                let id = Math.floor(Math.random() * 100);
+                
+                let stickerClass = null;
+                let stickerBtnId = null;
+                switch(type){
+                    case 'queue': stickerClass = "content__stickerQueue"; stickerBtnId = "#addTaskQueue"; break;
+                    case 'inwork': stickerClass = "content__stickerInWork"; stickerBtnId = "#addTaskInWork"; break;
+                    case 'complited': stickerClass = "content__stickerComplited"; stickerBtnId = "#addTaskComplited"; break;
+                }
+                
+
+                controller.add(id, taskObject.currentTask.name,`<div class="${stickerClass}" data-id="${id}">
+                    <div class="content__name">${taskObject.currentTask.name}</div>
+                    <i class="fa fa-times content__close" aria-hidden="true"></i>
+                    <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
+                </div>`, stickerBtnId, '.content__close', '.content__edit', type);
+                controller.render();
+            }
         }
     };
 
     const controller = {
-        addTask: function(id, name, newTag, insertBeforeEl, closeTag, editTag, type){
+        add: function(id, name, newTag, insertBeforeEl, closeTag, editTag, type){
             that = this
             let newSticker = $(newTag).insertBefore(insertBeforeEl);
             
@@ -46,6 +90,12 @@ const makingTasker = (function(){
             newSticker.find(editTag).click(function(){
                 console.log($(that));
                 that.edit(that, $(this).parent().attr('data-id'));
+            });
+
+            newSticker.draggable({
+                start: function(){
+                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                }
             });
             
             let tmpArrLocalStorage = logs.selectDataLocalStorage();
@@ -77,7 +127,6 @@ const makingTasker = (function(){
 
         //не уверен, что рендер должен относиться к контроллеру
         render: function(){
-            alert(document.getElementById('bodyTemplate').innerHTML);
             tmpl = _.template(document.getElementById('bodyTemplate').innerHTML);
             let html = tmpl({localStorageData: logs.selectDataLocalStorage()});
             document.getElementsByTagName('body')[0].innerHTML = html;
@@ -87,80 +136,77 @@ const makingTasker = (function(){
     const handler = {
         on: function(){
             that = this;
-            let currentTask = null;
-            let currentTaskHtml = null;
 
-            $('#addTaskQueue').click(function(){
+
+            function beforeCreateSticker(btnId, classTask, type){
                 let id = Math.floor(Math.random() * 100);
                 let name = prompt('What will be the name of task', 'default task');
-                controller.addTask(id, name,`<div class="content__stickerQueue" data-id="${id}">
+                controller.add(id, name,`<div class="${classTask}" data-id="${id}">
                 <div class="content__name">${name}</div>
-                <i class="fa fa-times content__close--queue" aria-hidden="true"></i>
-                <i class="fa fa-pencil content__edit--queue" aria-hidden="true"></i>
-            </div>`, '#addTaskQueue', '.content__close--queue', '.content__edit--queue', 'queue');
+                <i class="fa fa-times content__close" aria-hidden="true"></i>
+                <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
+            </div>`, btnId, '.content__close', '.content__edit', type);
+            }
+
+            $('#addTaskQueue').click(function(){
+                beforeCreateSticker('#addTaskQueue', 'content__stickerQueue', 'queue');
+            });
+
+            $('#addTaskInWork').click(function(){
+                beforeCreateSticker('#addTaskInWork', 'content__stickerInWork', 'inwork');
+            });
+
+            $('#addTaskComplited').click(function(){
+                beforeCreateSticker('#addTaskComplited', 'content__stickerComplited', 'complited');
             });
 
             $('.content__stickerQueue').draggable({
                 start: function(){
-                    let id = +$(this).attr('data-id');
-                    currentTask = _.find(logs.selectDataLocalStorage(), {id: id});
-                    currentTaskHtml = this;
+                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                }
+            });
+
+            $('.content__stickerInWork').draggable({
+                start: function(){
+                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                }
+            });
+
+            $('.content__stickerComplited').draggable({
+                start: function(){
+                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                }
+            });
+
+            $("#contentQueue").droppable({
+                drop: function (){
+                    managerDraggable.stopDraggable('queue');
                 }
             });
 
             $("#contentInWork").droppable({
                 drop: function (){
-                    $(currentTaskHtml).animate({
-                        opacity: 0.5
-                    }, 1000).remove();
-
-                    let dataLocalStorage = logs.selectDataLocalStorage();
-                    _.remove(dataLocalStorage, {id: currentTask.id});
-                    logs.insertDataLocalStorage(dataLocalStorage);
-
-                    let id = Math.floor(Math.random() * 100);
-
-                    controller.addTask(currentTask.id, currentTask.name,`<div class="content__stickerInWork" data-id="${id}">
-                        <div class="content__name">${currentTask.name}</div>
-                        <i class="fa fa-times content__close--inwork" aria-hidden="true"></i>
-                        <i class="fa fa-pencil content__edit--inwork" aria-hidden="true"></i>
-                    </div>`, '#addTaskInWork', '.content__close--inwork', '.content__edit--inwork', 'inwork');
+                    managerDraggable.stopDraggable('inwork');
                 }
             });
 
-            $('.content__edit--queue').click(function(event){
+            $("#contentComplited").droppable({
+                drop: function (){
+                    managerDraggable.stopDraggable('complited');
+                }
+            });
+
+            $('.content__edit').click(function(event){
                 controller.edit(this, $(this).parent().attr('data-id'));
+                controller.render();
             });
 
-            $('.content__close--queue').click(function(event){
+            $('.content__close').click(function(event){
                 controller.delete(this, $(this).parent().attr('data-id'));
+                controller.render();
             });
-
-            $('#addTaskInWork').click(function(){
-
-            });
-            $('#addTaskComplited').click(function(){alert('complited')});
         },
         off: function(){},
-
-        // edit: function(that, id){
-        //     alert(id);
-        //     let anotherNameTask = prompt('Another name of task', 'another task');
-        //     let tmpLocalStorage = logs.selectDataLocalStorage();
-        //     let tmpTask = _.remove(tmpLocalStorage, {id: +id})[0];
-        //     tmpTask['name'] = anotherNameTask;
-        //     tmpLocalStorage.push(tmpTask);
-
-        //     logs.insertDataLocalStorage(tmpLocalStorage);
-        // },
-
-        // delete: function(that, id){
-        //     alert(id);
-        //     let tmpLocalStorage = logs.selectDataLocalStorage();
-        //     _.remove(tmpLocalStorage, {id: +id});
-        //     logs.insertDataLocalStorage(tmpLocalStorage);
-        //     $(that).parent().remove();
-        // }
     };
 
     function init(){

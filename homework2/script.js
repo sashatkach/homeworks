@@ -2,17 +2,18 @@ const logger = (function(){
     let handlers = {
         onMouseMoveWindow: function(){
             $(window).mousemove(function(event){
-                if(logs.idActiveInterval){
-                    clearInterval(logs.idActiveInterval);
-                }
+                // if(logs.idActiveInterval){
+                //     clearInterval(logs.idActiveInterval);
+                // }
         
-                if(logs.getSecondsWithoutCalculate() >= 20){
-                    logs.resetSecondsWithoutCalculate();
-                    if(logs.getStopTime() >= 20)
-                        logs.addStopTime(-20);
-                }
+                // if(logs.getSecondsWithoutCalculate() >= 20){
+                //     logs.resetSecondsWithoutCalculate();
+                //     if(logs.getStopTime() >= 20)
+                //         logs.addStopTime(-20);
+                // }
         
-                logs.idActiveInterval = setInterval(() => {logs.addStopSeconds(1), logs.addSecondsWithoutCalculate(1)}, 1000);
+                // logs.idActiveInterval = setInterval(() => {logs.addStopSeconds(1), logs.addSecondsWithoutCalculate(1)}, 1000);
+                logs.timeLastActivity = new Date().getTime();
             });
         },
 
@@ -36,11 +37,12 @@ const logger = (function(){
     };
 
     let logs = {
+        timeLastActivity: 0,
         totalSeconds: 0,
         idTotalInterval: null,
-        idActiveInterval : null,
-        stopTime : 0,
-        secondsWithoutCalculate : 0,
+        //idActiveInterval : null,
+        //stopTime : 0,
+        //secondsWithoutCalculate : 0,
 
         preInit: function(){
             this.stopTime = 0;
@@ -58,8 +60,8 @@ const logger = (function(){
             handlers.onLeaveWindow();
             handlers.onCloseWindow();
 
-            if(!localStorage.getItem(this.config.localStorageName)){
-                localStorage.setItem(this.config.localStorageName, JSON.stringify([]));
+            if(!localStorage.getItem(config.localStorageName)){
+                localStorage.setItem(config.localStorageName, JSON.stringify([]));
             }
         },
 
@@ -68,7 +70,7 @@ const logger = (function(){
         },
 
         selectData: function(){
-            return JSON.parse(localStorage.getItem(this.config.localStorageName));
+            return JSON.parse(localStorage.getItem(config.localStorageName));
         },
 
         insertData: function(){
@@ -80,7 +82,7 @@ const logger = (function(){
                     activeTime: this.getActiveTime()
                 }
             })
-            localStorage.setItem(this.config.localStorageName, JSON.stringify(valWithLocalStorageData));
+            localStorage.setItem(config.localStorageName, JSON.stringify(valWithLocalStorageData));
         },
 
         leaveControlPage: function(){
@@ -135,8 +137,17 @@ const logger = (function(){
         }
     };
 
+    let config = {
+        activityTimeCredit: 20,
+        localStorageName: 'appData'
+    };
+
+    function init(){
+        logs.init();
+    }
+
     return {
-        init: logs.init();
+        init: init
     };
 })();
 

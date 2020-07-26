@@ -401,28 +401,14 @@ template {
     width: 100px;
     height: 100px;
     background-color: #f3e25e; }
-  .content__close--queue {
+  .content__close {
     position: absolute;
     top: 3px;
     right: 2px;
     content: "\f00d";
     font: normal normal normal 24px/1 FontAwesome;
     color: #fff; }
-  .content__edit--queue {
-    position: absolute;
-    top: 3px;
-    right: 22px;
-    content: "\f040";
-    font: normal normal normal 24px/1 FontAwesome;
-    color: #fff; }
-  .content__close--inwork {
-    position: absolute;
-    top: 3px;
-    right: 2px;
-    content: "\f00d";
-    font: normal normal normal 24px/1 FontAwesome;
-    color: #fff; }
-  .content__edit--inwork {
+  .content__edit {
     position: absolute;
     top: 3px;
     right: 22px;

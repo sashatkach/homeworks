@@ -71,7 +71,7 @@
         background-color: $energyYellow;
     }
 
-    &__close--queue {
+    &__close {
         position: absolute;
         top: 3px;
         right: 2px;
@@ -80,25 +80,7 @@
         color: $white;
     }
 
-    &__edit--queue {
-        position: absolute;
-        top: 3px;
-        right: 22px;
-        content: "\f040";
-        font: normal normal normal 24px/1 FontAwesome;
-        color: $white;
-    }
-
-    &__close--inwork {
-        position: absolute;
-        top: 3px;
-        right: 2px;
-        content: "\f00d";
-        font: normal normal normal 24px/1 FontAwesome;
-        color: $white;
-    }
-
-    &__edit--inwork {
+    &__edit {
         position: absolute;
         top: 3px;
         right: 22px;

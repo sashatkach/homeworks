@@ -1,16 +1,16 @@
-let makingTasker = (function(){
-    let config = {
+const makingTasker = (function(){
+    const config = {
         appData: 'appData',
         initData: [],
     };
 
-    let logs = {
+    const logs = {
         init: function(){
             if(!localStorage.getItem(config.appData)){
                 localStorage.setItem(config.appData, JSON.stringify(config.initData));
             }
 
-            let localStorageData = this.selectDataLocalStorage();
+            /*let localStorageData = this.selectDataLocalStorage();
             let htmlCodeQueue = '';
             let localStorageDataQueue = _.filter(localStorageData, {type: 'queue'});
             _.each(localStorageDataQueue, function(item){
@@ -21,7 +21,8 @@ let makingTasker = (function(){
                 </div>`;
             });
 
-            $(htmlCodeQueue).insertBefore('#addTaskQueue');
+            $(htmlCodeQueue).insertBefore('#addTaskQueue');*/
+            controller.render();
         },
 
         selectDataLocalStorage: function(){
@@ -30,37 +31,69 @@ let makingTasker = (function(){
 
         insertDataLocalStorage: function(localStorageData){
             localStorage.setItem(config.appData, JSON.stringify(localStorageData));
-        },
+        }
+    };
 
+    const controller = {
         addTask: function(id, name, newTag, insertBeforeEl, closeTag, editTag, type){
-            let that = this;
-            
+            that = this
             let newSticker = $(newTag).insertBefore(insertBeforeEl);
             
             newSticker.find(closeTag).click(function(){
-                handler.delete(that, $(this).parent().attr('data-id'));
+                that.delete(that, $(this).parent().attr('data-id'));
             });
 
             newSticker.find(editTag).click(function(){
                 console.log($(that));
-                handler.edit(that, $(this).parent().attr('data-id'));
+                that.edit(that, $(this).parent().attr('data-id'));
             });
             
-            let tmpArrLocalStorage = that.selectDataLocalStorage();
+            let tmpArrLocalStorage = logs.selectDataLocalStorage();
             tmpArrLocalStorage.push({id: id, name:name, date:new Date(), type:type});
-            that.insertDataLocalStorage(tmpArrLocalStorage); 
+            logs.insertDataLocalStorage(tmpArrLocalStorage);
+            this.render(); 
+        },
+
+        edit: function(that, id){
+            alert(id);
+            let anotherNameTask = prompt('Another name of task', 'another task');
+            let tmpLocalStorage = logs.selectDataLocalStorage();
+            let tmpTask = _.remove(tmpLocalStorage, {id: +id})[0];
+            tmpTask['name'] = anotherNameTask;
+            tmpLocalStorage.push(tmpTask);
+
+            logs.insertDataLocalStorage(tmpLocalStorage);
+            this.render();
+        },
+
+        delete: function(that, id){
+            alert(id);
+            let tmpLocalStorage = logs.selectDataLocalStorage();
+            _.remove(tmpLocalStorage, {id: +id});
+            logs.insertDataLocalStorage(tmpLocalStorage);
+            $(that).parent().remove();
+            this.render();
+        },
+
+        //не уверен, что рендер должен относиться к контроллеру
+        render: function(){
+            alert(document.getElementById('bodyTemplate').innerHTML);
+            tmpl = _.template(document.getElementById('bodyTemplate').innerHTML);
+            let html = tmpl({localStorageData: logs.selectDataLocalStorage()});
+            document.getElementsByTagName('body')[0].innerHTML = html;
         },
     };
 
-    let handler = {
+    const handler = {
         on: function(){
             that = this;
             let currentTask = null;
             let currentTaskHtml = null;
+
             $('#addTaskQueue').click(function(){
                 let id = Math.floor(Math.random() * 100);
                 let name = prompt('What will be the name of task', 'default task');
-                logs.addTask(id, name,`<div class="content__stickerQueue" data-id="${id}">
+                controller.addTask(id, name,`<div class="content__stickerQueue" data-id="${id}">
                 <div class="content__name">${name}</div>
                 <i class="fa fa-times content__close--queue" aria-hidden="true"></i>
                 <i class="fa fa-pencil content__edit--queue" aria-hidden="true"></i>
@@ -87,7 +120,7 @@ let makingTasker = (function(){
 
                     let id = Math.floor(Math.random() * 100);
 
-                    logs.addTask(currentTask.id, currentTask.name,`<div class="content__stickerInWork" data-id="${id}">
+                    controller.addTask(currentTask.id, currentTask.name,`<div class="content__stickerInWork" data-id="${id}">
                         <div class="content__name">${currentTask.name}</div>
                         <i class="fa fa-times content__close--inwork" aria-hidden="true"></i>
                         <i class="fa fa-pencil content__edit--inwork" aria-hidden="true"></i>
@@ -96,11 +129,11 @@ let makingTasker = (function(){
             });
 
             $('.content__edit--queue').click(function(event){
-                that.edit(this, $(this).parent().attr('data-id'));
+                controller.edit(this, $(this).parent().attr('data-id'));
             });
 
             $('.content__close--queue').click(function(event){
-                that.delete(this, $(this).parent().attr('data-id'));
+                controller.delete(this, $(this).parent().attr('data-id'));
             });
 
             $('#addTaskInWork').click(function(){
@@ -110,24 +143,24 @@ let makingTasker = (function(){
         },
         off: function(){},
 
-        edit: function(that, id){
-            alert(id);
-            let anotherNameTask = prompt('Another name of task', 'another task');
-            let tmpLocalStorage = logs.selectDataLocalStorage();
-            let tmpTask = _.remove(tmpLocalStorage, {id: +id})[0];
-            tmpTask['name'] = anotherNameTask;
-            tmpLocalStorage.push(tmpTask);
+        // edit: function(that, id){
+        //     alert(id);
+        //     let anotherNameTask = prompt('Another name of task', 'another task');
+        //     let tmpLocalStorage = logs.selectDataLocalStorage();
+        //     let tmpTask = _.remove(tmpLocalStorage, {id: +id})[0];
+        //     tmpTask['name'] = anotherNameTask;
+        //     tmpLocalStorage.push(tmpTask);
 
-            logs.insertDataLocalStorage(tmpLocalStorage);
-        },
+        //     logs.insertDataLocalStorage(tmpLocalStorage);
+        // },
 
-        delete: function(that, id){
-            alert(id);
-            let tmpLocalStorage = logs.selectDataLocalStorage();
-            _.remove(tmpLocalStorage, {id: +id});
-            logs.insertDataLocalStorage(tmpLocalStorage);
-            $(that).parent().remove();
-        }
+        // delete: function(that, id){
+        //     alert(id);
+        //     let tmpLocalStorage = logs.selectDataLocalStorage();
+        //     _.remove(tmpLocalStorage, {id: +id});
+        //     logs.insertDataLocalStorage(tmpLocalStorage);
+        //     $(that).parent().remove();
+        // }
     };
 
     function init(){

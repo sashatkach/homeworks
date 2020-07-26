@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="wrapper">
+    
+    <!--<main class="wrapper">
         <section class="column">
             <h3 class="column__heading column__heading--queue">Queue</h3>
             <div class="content" id="contentQueue">
@@ -29,7 +30,65 @@
                 <button id="addTaskComplited" class="content__addBtn"><i class="fa fa-plus" aria-hidden="true"></i></button>
             </div>
         </section>   
-    </main>
+    </main>-->
+    <script type="text/template" id="bodyTemplate">
+
+        <main class="wrapper">
+            
+            <section class="column">
+                <% tasks = _.filter(localStorageData, {type: "queue"});  %>
+                <h3 class="column__heading column__heading--queue">Queue</h3>
+                <div class="content" id="contentQueue">
+                <% tasks.forEach(function(task) { %>
+                    <div class="content__stickerQueue" data-id="<%-task.id%>">
+                        <div class="content__name"><%-task.name%></div>
+                        <i class="fa fa-times content__close" aria-hidden="true"></i>
+                        <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
+                    </div>
+                <% }); %>
+                
+                
+                    <button id="addTaskQueue" class="content__addBtn"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                </div>			
+        
+            </section>
+            
+            <section class="column">
+                <% tasks = _.filter(localStorageData, {type: "inwork"});  %>
+                <h3 class="column__heading column__heading--inwork">Queue</h3>
+                <div class="content" id="contentQueue">
+                <% tasks.forEach(function(task) { %>
+                    <div class="content__stickerInWork" data-id="<%-task.id%>">
+                        <div class="content__name"><%-task.name%></div>
+                        <i class="fa fa-times content__close" aria-hidden="true"></i>
+                        <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
+                    </div>
+                <% }); %>
+                
+                
+                    <button id="addTaskQueue" class="content__addBtn"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                </div>	
+            </section>		
+            
+            
+            <section class="column">
+                <% tasks = _.filter(localStorageData, {type: "complited"});  %>
+                <h3 class="column__heading column__heading--complited">Queue</h3>
+                <div class="content" id="contentQueue">
+                <% tasks.forEach(function(task) { %>
+                    <div class="content__stickerComplited" data-id="<%-task.id%>">
+                        <div class="content__name"><%-task.name%></div>
+                        <i class="fa fa-times content__close" aria-hidden="true"></i>
+                        <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
+                    </div>
+                <% }); %>
+                
+                
+                    <button id="addTaskComplited" class="content__addBtn"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                </div>
+            </section>	
+        </main>
+    </script>
     <script src="lodash.js"></script>
     <script src="jquery.js"></script>
     <script src="jquery-ui.min.js"></script>

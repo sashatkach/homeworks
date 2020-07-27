@@ -174,6 +174,18 @@ const makingTasker = (function(){
                 }
             });
 
+            // $(document).on('click', '[data-action=taskEdit]', function(event){
+            //     controller.edit(this, $(this).parent().attr('data-id'));
+            //     controller.render();
+            //     handler.on();
+            // });
+
+            // $(document).on('click', '[data-action=taskDelete]', function(event){
+            //     controller.delete(this, $(this).parent().attr('data-id'));
+            //     controller.render();
+            //     handler.on();
+            // });
+
             $('.content__edit').click(function(event){
                 controller.edit(this, $(this).parent().attr('data-id'));
                 controller.render();

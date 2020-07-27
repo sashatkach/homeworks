@@ -8,16 +8,13 @@ const makingTasker = (function(){
         currentTask : null,
         currentTaskHtml : null,
 
-        makeTask: function(btnId, classTask, type){
+        makeTask: function(htmlTaskAttr){
             let id = logs.selectDataLocalStorage().length;
             let name = prompt('What will be the name of task', 'default task');
-            controller.renderNewTask(id, name, classTask, btnId);
-            controller.add(id, name, type);
-        },
-
-        exchangeTask: function(id, name, btnId, classTask, type){
-            controller.renderNewTask(id, name, classTask, btnId);
-            controller.add(id, name, type);
+            return {
+                id: id,
+                name: name
+            };
         }
     };
 
@@ -64,7 +61,8 @@ const makingTasker = (function(){
                     case 'complited': stickerClass = "content__stickerComplited"; stickerBtnId = "#addTaskComplited"; break;
                 }
                 
-                taskObjectManager.exchangeTask(taskObjectManager.currentTask.id, taskObjectManager.currentTask.name, stickerBtnId, stickerClass, type);
+                controller.renderNewTask(taskObjectManager.currentTask.id, taskObjectManager.currentTask.name, stickerClass, stickerBtnId);
+                controller.add(taskObjectManager.currentTask.id, taskObjectManager.currentTask.name, type);
                 controller.render();
                 handler.on();
             }
@@ -123,15 +121,21 @@ const makingTasker = (function(){
             that = this;
 
             $('#addTaskQueue').click(function(){
-                taskObjectManager.makeTask('#addTaskQueue', 'content__stickerQueue', 'queue');
+                let taskHtmlAttr = taskObjectManager.makeTask();
+                controller.renderNewTask(taskHtmlAttr.id, taskHtmlAttr.name, '.content__stickerInWork', '#addTaskQueue');
+                controller.add(taskHtmlAttr.id, taskHtmlAttr.name, 'queue');
             });
 
             $('#addTaskInWork').click(function(){
-                taskObjectManager.makeTask('#addTaskInWork', 'content__stickerInWork', 'inwork');
+                let taskHtmlAttr = taskObjectManager.makeTask();
+                controller.renderNewTask(taskHtmlAttr.id, taskHtmlAttr.name, '.content__stickerInWork', '#addTaskInWork');
+                controller.add(taskHtmlAttr.id, taskHtmlAttr.name, 'inwork');
             });
 
             $('#addTaskComplited').click(function(){
-                taskObjectManager.makeTask('#addTaskComplited', 'content__stickerComplited', 'complited');
+                let taskHtmlAttr = taskObjectManager.makeTask();
+                controller.renderNewTask(taskHtmlAttr.id, taskHtmlAttr.name, '.content__stickerComplited', '#addTaskInWork');
+                controller.add(taskHtmlAttr.id, taskHtmlAttr.name, 'complited');
             });
 
             $('.content__stickerQueue').draggable({

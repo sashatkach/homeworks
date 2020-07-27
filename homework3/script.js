@@ -4,9 +4,19 @@ const makingTasker = (function(){
         initData: [],
     };
 
-    const taskObject = {
+    const taskObjectManager = {
         currentTask : null,
         currentTaskHtml : null,
+
+        createSticker: function(btnId, classTask, type){
+            let id = Math.floor(Math.random() * 100);
+            let name = prompt('What will be the name of task', 'default task');
+            controller.add(id, name,`<div class="${classTask}" data-id="${id}">
+            <div class="content__name">${name}</div>
+            <i class="fa fa-times content__close" aria-hidden="true"></i>
+            <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
+        </div>`, btnId, '.content__close', '.content__edit', type);
+        }
     };
 
     const logs = {
@@ -14,19 +24,6 @@ const makingTasker = (function(){
             if(!localStorage.getItem(config.appData)){
                 localStorage.setItem(config.appData, JSON.stringify(config.initData));
             }
-
-            /*let localStorageData = this.selectDataLocalStorage();
-            let htmlCodeQueue = '';
-            let localStorageDataQueue = _.filter(localStorageData, {type: 'queue'});
-            _.each(localStorageDataQueue, function(item){
-                htmlCodeQueue += `<div class="content__stickerQueue" data-id="${item.id}">
-                    <div class="content__name">${item.name}</div>
-                    <i class="fa fa-times content__close--queue" aria-hidden="true"></i>
-                    <i class="fa fa-pencil content__edit--queue" aria-hidden="true"></i>
-                </div>`;
-            });
-
-            $(htmlCodeQueue).insertBefore('#addTaskQueue');*/
             controller.render();
         },
 
@@ -48,13 +45,13 @@ const makingTasker = (function(){
         },
 
         stopDraggable: function(type){
-            if(taskObject.currentTask.type !== type){
-                $(taskObject.currentTaskHtml).animate({
+            if(taskObjectManager.currentTask.type !== type){
+                $(taskObjectManager.currentTaskHtml).animate({
                     opacity: 0.5
                 }, 1000).remove();
 
                 let dataLocalStorage = logs.selectDataLocalStorage();
-                _.remove(dataLocalStorage, {id: taskObject.currentTask.id});
+                _.remove(dataLocalStorage, {id: taskObjectManager.currentTask.id});
                 logs.insertDataLocalStorage(dataLocalStorage);
 
                 let id = Math.floor(Math.random() * 100);
@@ -68,8 +65,8 @@ const makingTasker = (function(){
                 }
                 
 
-                controller.add(id, taskObject.currentTask.name,`<div class="${stickerClass}" data-id="${id}">
-                    <div class="content__name">${taskObject.currentTask.name}</div>
+                controller.add(id, taskObjectManager.currentTask.name,`<div class="${stickerClass}" data-id="${id}">
+                    <div class="content__name">${taskObjectManager.currentTask.name}</div>
                     <i class="fa fa-times content__close" aria-hidden="true"></i>
                     <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
                 </div>`, stickerBtnId, '.content__close', '.content__edit', type);
@@ -94,7 +91,7 @@ const makingTasker = (function(){
 
             newSticker.draggable({
                 start: function(){
-                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                    [taskObjectManager.currentTask, taskObjectManager.currentTaskHtml] = managerDraggable.startDraggable(this);
                 }
             });
             
@@ -137,44 +134,33 @@ const makingTasker = (function(){
         on: function(){
             that = this;
 
-
-            function beforeCreateSticker(btnId, classTask, type){
-                let id = Math.floor(Math.random() * 100);
-                let name = prompt('What will be the name of task', 'default task');
-                controller.add(id, name,`<div class="${classTask}" data-id="${id}">
-                <div class="content__name">${name}</div>
-                <i class="fa fa-times content__close" aria-hidden="true"></i>
-                <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
-            </div>`, btnId, '.content__close', '.content__edit', type);
-            }
-
             $('#addTaskQueue').click(function(){
-                beforeCreateSticker('#addTaskQueue', 'content__stickerQueue', 'queue');
+                taskObjectManager.createSticker('#addTaskQueue', 'content__stickerQueue', 'queue');
             });
 
             $('#addTaskInWork').click(function(){
-                beforeCreateSticker('#addTaskInWork', 'content__stickerInWork', 'inwork');
+                taskObjectManager.createSticker('#addTaskInWork', 'content__stickerInWork', 'inwork');
             });
 
             $('#addTaskComplited').click(function(){
-                beforeCreateSticker('#addTaskComplited', 'content__stickerComplited', 'complited');
+                taskObjectManager.createSticker('#addTaskComplited', 'content__stickerComplited', 'complited');
             });
 
             $('.content__stickerQueue').draggable({
                 start: function(){
-                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                    [taskObjectManager.currentTask, taskObjectManager.currentTaskHtml] = managerDraggable.startDraggable(this);
                 }
             });
 
             $('.content__stickerInWork').draggable({
                 start: function(){
-                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                    [taskObjectManager.currentTask, taskObjectManager.currentTaskHtml] = managerDraggable.startDraggable(this);
                 }
             });
 
             $('.content__stickerComplited').draggable({
                 start: function(){
-                    [taskObject.currentTask, taskObject.currentTaskHtml] = managerDraggable.startDraggable(this);
+                    [taskObjectManager.currentTask, taskObjectManager.currentTaskHtml] = managerDraggable.startDraggable(this);
                 }
             });
 

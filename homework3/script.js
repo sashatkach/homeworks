@@ -8,14 +8,16 @@ const makingTasker = (function(){
         currentTask : null,
         currentTaskHtml : null,
 
-        createSticker: function(btnId, classTask, type){
-            let id = Math.floor(Math.random() * 100);
+        makeTask: function(btnId, classTask, type){
+            let id = logs.selectDataLocalStorage().length;
             let name = prompt('What will be the name of task', 'default task');
-            controller.add(id, name,`<div class="${classTask}" data-id="${id}">
-            <div class="content__name">${name}</div>
-            <i class="fa fa-times content__close" aria-hidden="true"></i>
-            <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
-        </div>`, btnId, '.content__close', '.content__edit', type);
+            controller.renderNewTask(id, name, classTask, btnId);
+            controller.add(id, name, type);
+        },
+
+        exchangeTask: function(id, name, btnId, classTask, type){
+            controller.renderNewTask(id, name, classTask, btnId);
+            controller.add(id, name, type);
         }
     };
 
@@ -53,8 +55,6 @@ const makingTasker = (function(){
                 let dataLocalStorage = logs.selectDataLocalStorage();
                 _.remove(dataLocalStorage, {id: taskObjectManager.currentTask.id});
                 logs.insertDataLocalStorage(dataLocalStorage);
-
-                let id = Math.floor(Math.random() * 100);
                 
                 let stickerClass = null;
                 let stickerBtnId = null;
@@ -64,45 +64,23 @@ const makingTasker = (function(){
                     case 'complited': stickerClass = "content__stickerComplited"; stickerBtnId = "#addTaskComplited"; break;
                 }
                 
-
-                controller.add(id, taskObjectManager.currentTask.name,`<div class="${stickerClass}" data-id="${id}">
-                    <div class="content__name">${taskObjectManager.currentTask.name}</div>
-                    <i class="fa fa-times content__close" aria-hidden="true"></i>
-                    <i class="fa fa-pencil content__edit" aria-hidden="true"></i>
-                </div>`, stickerBtnId, '.content__close', '.content__edit', type);
+                taskObjectManager.exchangeTask(taskObjectManager.currentTask.id, taskObjectManager.currentTask.name, stickerBtnId, stickerClass, type);
                 controller.render();
+                handler.on();
             }
         }
     };
 
     const controller = {
-        add: function(id, name, newTag, insertBeforeEl, closeTag, editTag, type){
-            that = this
-            let newSticker = $(newTag).insertBefore(insertBeforeEl);
-            
-            newSticker.find(closeTag).click(function(){
-                that.delete(that, $(this).parent().attr('data-id'));
-            });
-
-            newSticker.find(editTag).click(function(){
-                console.log($(that));
-                that.edit(that, $(this).parent().attr('data-id'));
-            });
-
-            newSticker.draggable({
-                start: function(){
-                    [taskObjectManager.currentTask, taskObjectManager.currentTaskHtml] = managerDraggable.startDraggable(this);
-                }
-            });
-            
+        add: function(id, name, type){
             let tmpArrLocalStorage = logs.selectDataLocalStorage();
             tmpArrLocalStorage.push({id: id, name:name, date:new Date(), type:type});
             logs.insertDataLocalStorage(tmpArrLocalStorage);
             this.render(); 
+            handler.on();
         },
 
         edit: function(that, id){
-            alert(id);
             let anotherNameTask = prompt('Another name of task', 'another task');
             let tmpLocalStorage = logs.selectDataLocalStorage();
             let tmpTask = _.remove(tmpLocalStorage, {id: +id})[0];
@@ -111,23 +89,33 @@ const makingTasker = (function(){
 
             logs.insertDataLocalStorage(tmpLocalStorage);
             this.render();
+            handler.on();
         },
 
         delete: function(that, id){
-            alert(id);
             let tmpLocalStorage = logs.selectDataLocalStorage();
             _.remove(tmpLocalStorage, {id: +id});
             logs.insertDataLocalStorage(tmpLocalStorage);
             $(that).parent().remove();
             this.render();
+            handler.on();
+        },
+        
+        render: function(){
+            let tmpl = _.template($('#bodyTemplate').html());
+            let html = tmpl({localStorageData: logs.selectDataLocalStorage()});
+            if($('#container>.wrapper').is('.wrapper')){
+                $('#container>.wrapper').replaceWith(html);
+            }else {
+                $('#container').append(html);
+            }
         },
 
-        //не уверен, что рендер должен относиться к контроллеру
-        render: function(){
-            tmpl = _.template(document.getElementById('bodyTemplate').innerHTML);
-            let html = tmpl({localStorageData: logs.selectDataLocalStorage()});
-            document.getElementsByTagName('body')[0].innerHTML = html;
-        },
+        renderNewTask: function(id, name, classTask, btnId){
+            let tmpl = _.template($('#taskTemplate').html());
+            let html = tmpl({id: id, classTask: classTask, name: name});
+            $(html).insertBefore(btnId);
+        }
     };
 
     const handler = {
@@ -135,15 +123,15 @@ const makingTasker = (function(){
             that = this;
 
             $('#addTaskQueue').click(function(){
-                taskObjectManager.createSticker('#addTaskQueue', 'content__stickerQueue', 'queue');
+                taskObjectManager.makeTask('#addTaskQueue', 'content__stickerQueue', 'queue');
             });
 
             $('#addTaskInWork').click(function(){
-                taskObjectManager.createSticker('#addTaskInWork', 'content__stickerInWork', 'inwork');
+                taskObjectManager.makeTask('#addTaskInWork', 'content__stickerInWork', 'inwork');
             });
 
             $('#addTaskComplited').click(function(){
-                taskObjectManager.createSticker('#addTaskComplited', 'content__stickerComplited', 'complited');
+                taskObjectManager.makeTask('#addTaskComplited', 'content__stickerComplited', 'complited');
             });
 
             $('.content__stickerQueue').draggable({
@@ -185,11 +173,13 @@ const makingTasker = (function(){
             $('.content__edit').click(function(event){
                 controller.edit(this, $(this).parent().attr('data-id'));
                 controller.render();
+                handler.on();
             });
 
             $('.content__close').click(function(event){
                 controller.delete(this, $(this).parent().attr('data-id'));
                 controller.render();
+                handler.on();
             });
         },
         off: function(){},
